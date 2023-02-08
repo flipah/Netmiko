@@ -1,30 +1,31 @@
+import os
+import re
 from netmiko import ConnectHandler
 from getpass import getpass
 from netmiko import NetMikoTimeoutException
 from paramiko.ssh_exception import SSHException
 from paramiko.ssh_exception import AuthenticationException
 
-# creates user inputed variables to re-use later
+# Saves an on-demand username and password as re-usable variables
 username = input('Enter your SSH username: ')
 password = getpass()
 
-with open('devices_file') as a:
-    devices_list = a.read().splitlines()
+# Opens the device file and takes out any spaces or added lines
+with open('device_file') as f:
+    device_list = f.read().splitlines()
 
-# opens a file contaning the IPs of the network devices
-# uses the username/password vairables inputed to login to the device
-for devices in devices_list:
-    print ('Connecting to device" ' + devices)
+# Starts the connection for the devices
+for devices in device_list:
+    print('Connecting to ' + devices)
     ip_address_of_device = devices
     ios_device = {
         'device_type': 'cisco_ios',
-        'ip': ip_address_of_device, 
+        'ip': ip_address_of_device,
         'username': username,
         'password': password
     }
-    
-    # prints out common errors to assist with troubleshooting
-    # prevents the script from completely stopping and will continue
+
+    # This is for error handeling
     try:
         net_connect = ConnectHandler(**ios_device)
     except (AuthenticationException):
@@ -42,16 +43,30 @@ for devices in devices_list:
     except Exception as unknown_error:
         print ('Some other error: ' + str(unknown_error))
         continue
-
-    # Enter enable mode, issue command, and disconnect
+    
+    # Connects to the device and only goes into enable mode
     net_connect.enable()
     results = net_connect.send_command('show run')
-    net_connect.disconnect() 
+    net_connect.disconnect()
 
     # Write output to a file
     filename = f"{ip_address_of_device}.txt"
     file = open( 
         f"{filename}", 'w')
-        #f"\\192.168.37.19\\home\\J6 Docs\\Network Automation\\Device Backup\\{filename}", 'w') ------- need to figure this out
     file.write(results)
     file.close()
+
+
+    # Open the file and read its contents
+    with open(filename, "r") as f:
+        contents = f.read()
+
+    # Use a regular expression to search for the hostname
+    hostname_pattern = r"hostname\s+(\S+)"
+    match = re.search(hostname_pattern, contents)
+
+    # If a hostname was found, rename the file to that hostname
+    if match:
+        hostname = match.group(1)
+        os.rename(filename, hostname + ".txt")
+    print('Backup completed for ' + hostname)
