@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 from netmiko import ConnectHandler
 from getpass import getpass
 from netmiko import NetMikoTimeoutException
@@ -69,4 +70,10 @@ for devices in device_list:
     if match:
         hostname = match.group(1)
         os.rename(filename, hostname + ".txt")
+    # Define the path to the directory where the file should be moved
+    destination_directory = "Device_Backups"
+
+    # Move the file to the destination directory
+    shutil.move(hostname + ".txt", destination_directory)
+
     print('Backup completed for ' + hostname)
