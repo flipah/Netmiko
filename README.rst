@@ -9,7 +9,7 @@ To be able to use these scripts you first must install netmiko - Use the followi
   - pip3 install netmiko
 
 Things to do
-  1. Record hostname to name files
-  2. Backup to external share drive
+  1. Record hostname to name files (Complete)
+  2. Backup to external share drive (Partial; Saves locally right now to a new directory)
   3. Parse through data to see if the config already has the commands in
   4. Automatic times script runs (weekly)
