@@ -72,8 +72,12 @@ for devices in device_list:
         os.rename(filename, hostname + ".txt")
     # Define the path to the directory where the file should be moved
     destination_directory = "Device_Backups"
-
-    # Move the file to the destination directory
-    shutil.move(hostname + ".txt", destination_directory)
+   
+# Move the file to the destination directory, replacing the destination file if it already exists
+    try:
+        shutil.move(os.path.join(os.getcwd(), hostname + ".txt"), os.path.join(os.getcwd(), destination_directory, hostname + ".txt"))
+        print(f"File {hostname}.txt was created and moved to {destination_directory}")
+    except shutil.Error as e:
+        print(f"Error moving file {hostname}.txt to {destination_directory}: {e}")
 
     print('Backup completed for ' + hostname)
